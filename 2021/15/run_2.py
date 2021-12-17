@@ -2,9 +2,10 @@ import os, sys, math
 from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
+import heapq
 
-#filename = "input_test.txt"
-filename = "input_final.txt"
+filename = "input_test.txt"
+#filename = "input_final.txt"
 
 size = 1
 if 'final' in filename:
@@ -35,10 +36,14 @@ class Node:
         self.y = y
         self.value = value
         self.start_dist = 1e100
-        self.dist_to_go = math.sqrt((size*scale - 1 - x)*(size*scale - 1 - x) + (size*scale - 1 - y)*(size*scale - 1 - y))
+        self.dist_to_go = 2*size*scale - 2 - x - y
+        self.previous_node = None
 
     def __str__(self):
         return "x {}, y, {}, value {}, start_dist {}, distance to go {}".format(self.x, self.y, self.value, self.start_dist, self.dist_to_go)
+
+    def __lt__(self, other):
+        return self.start_dist + self.dist_to_go < other.start_dist + other.dist_to_go
 
 def getNode(nodes, x, y):
     for node in nodes:
@@ -48,26 +53,35 @@ def getNode(nodes, x, y):
 
 def dijystra(grid):
     nodes = []
+
     for (x,y), value in np.ndenumerate(grid):
         node = Node(x,y,value)
         if x == 0 and y == 0:
             node.start_dist = 0
         nodes.append(node)
 
-#    X = []
-#    Y = []
+    X1 = []
+    X2 = []
+    Y1 = []
+    Y2 = []
+
+    heapq.heapify(nodes)
 
     while len(nodes) > 0:
-        nodes = sorted(nodes, key=lambda x: x.start_dist + x.dist_to_go, reverse=True)
-        current_node = nodes.pop()
+        heapq.heapify(nodes)
+        current_node = heapq.heappop(nodes)
 
         if len(nodes) % 100 == 0:
             print(current_node)
-#        X.append(current_node.x)
-#        Y.append(current_node.y)
 
-#        plt.scatter(X, Y)
-#        plt.show()
+        if current_node.previous_node != None:
+            X1.append(current_node.previous_node.x)
+            X2.append(current_node.x)
+            Y1.append(current_node.previous_node.y)
+            Y2.append(current_node.y)
+
+            plt.plot([current_node.previous_node.x, current_node.x], [current_node.previous_node.y, current_node.y], marker='o')
+            plt.pause(0.001)
 
         for nei_x, nei_y in [(1,0), (-1,0), (0,1), (0,-1)]:
             neighbour = getNode(nodes, current_node.x + nei_x, current_node.y + nei_y)
@@ -83,6 +97,7 @@ def dijystra(grid):
             return
 
 dijystra(grid)
+plt.show()
 
 #1  function Dijkstra(Graph, source):
 # 2
