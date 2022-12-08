@@ -1,0 +1,133 @@
+import os, sys, math
+import numpy as np
+import matplotlib.pyplot as plt
+
+#filename = "input_test2.txt"
+filename = "input_final.txt"
+
+with open(filename) as file:
+    lines = file.readlines()
+
+#on x=-30..21,y=-8..43,z=-13..34
+
+class Rule:
+    def __init__(self, value, minX, maxX, minY, maxY, minZ, maxZ):
+        self.value = value
+        self.minX = minX
+        self.maxX = maxX
+        self.minY = minY
+        self.maxY = maxY
+        self.minZ = minZ
+        self.maxZ = maxZ
+        self.taken = False
+
+        self.values = [value]
+        self.minXs = [minX]
+        self.maxXs = [maxX]
+        self.minYs = [minY]
+        self.maxYs = [maxY]
+        self.minZs = [minZ]
+        self.maxZs = [maxZ]
+
+    def __str__(self):
+        return "x={}..{}, y={}..{}, z={}..{}".format(self.minX, self.maxX, self.minY, self.maxY, self.minZ, self.maxZ)
+
+    def overlap(self, other):
+        xOverlap = False
+        for i in range(other.minX, other.maxX + 1):
+            if i in range(self.minX, self.maxX + 1):
+                xOverlap = True
+                break
+
+        yOverlap = False
+        for i in range(other.minY, other.maxY + 1):
+            if i in range(self.minY, self.maxY + 1):
+                yOverlap = True
+                break
+
+        zOverlap = False
+        for i in range(other.minZ, other.maxZ + 1):
+            if i in range(self.minZ, self.maxZ + 1):
+                zOverlap = True
+                break
+
+        if xOverlap and yOverlap and zOverlap:
+            other.taken = True
+            self.minXs.append(other.minX)
+            self.minX = min(self.minX, other.minX)
+            self.maxXs.append(other.maxX)
+            self.maxX = max(self.maxX, other.maxX)
+
+            self.minYs.append(other.minY)
+            self.minY = min(self.minY, other.minY)
+            self.maxYs.append(other.maxY)
+            self.maxY = max(self.maxY, other.maxY)
+
+            self.minZs.append(other.minZ)
+            self.minZ = min(self.minZ, other.minZ)
+            self.maxZs.append(other.maxZ)
+            self.maxZ = max(self.maxZ, other.maxZ)
+            return True
+
+        return False
+
+
+def number(x, y, z):
+    size = 1000000
+    size2 = 2000000
+    return (x + size) + size2 * (y + size) + size2 * size2 * (z + size)
+
+rules = []
+
+on = []
+
+for line in lines:
+    line = line.strip()
+    split = line.split()
+    second = split[1].split(",")
+    print("Rule {}".format(second))
+
+    value = 1 if split[0] == "on" else 0
+
+    x = second[0][2:]
+    y = second[1][2:]
+    z = second[2][2:]
+
+    minX = int(x.split("..")[0])
+    maxX = int(x.split("..")[1])
+    minY = int(y.split("..")[0])
+    maxY = int(y.split("..")[1])
+    minZ = int(z.split("..")[0])
+    maxZ = int(z.split("..")[1])
+
+    if value == 1:
+        for x in range(minX, maxX + 1):
+            for y in range(minY, maxY + 1):
+                for z in range(minZ, maxZ + 1):
+                    on.append((x,y,z))
+    if value == 0:
+        for x in range(minX, maxX + 1):
+           for y in range(minY, maxY + 1):
+                for z in range(minZ, maxZ + 1):
+                    num = (x,y,z)
+                    if num in on:
+                        on.remove(num)
+
+print(len(on))
+
+#    rules.append(Rule(value, minX, maxX, minY, maxY, minZ, maxZ))
+#
+#for x in range(2):
+#    print("Iteration {} number of rules {}".format(x, len(rules)))
+#    for i in range(len(rules)):
+#        if rules[i].taken:
+#            continue
+#        for j in range(i + 1, len(rules)):
+#            if rules[j].taken:
+#                continue
+#            overlap = rules[i].overlap(rules[j])
+#            if overlap:
+#                print("{} {} Overlap {}".format(i, j, overlap))
+#                break
+#
+#    rules = [rule for rule in rules if rule.taken == False]
