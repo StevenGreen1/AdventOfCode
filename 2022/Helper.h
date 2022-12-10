@@ -4,14 +4,34 @@
 #include <map>
 #include <set>
 
+using IntVector = std::vector<int>;
+using IntMatrix = std::vector<IntVector>;
+
 class Helper
 {
     public:
-    static void printVector(std::vector<char> vec)
+    template <typename T>
+    static void printVector(std::vector<T> vec, bool colour = false)
     {
         for (int i = 0; i < vec.size(); i++)
-            std::cout << vec[i] << " ";
+        {
+            if (vec[i] > 0)
+            {
+                std::cout << "\033[1;32m" << vec[i] << " \033[0m";
+            }
+            else
+            {
+                std::cout << "\033[1;31m" << vec[i] << " \033[0m";
+            }
+        }
         std::cout << std::endl;
+    }
+
+    template <typename T>
+    static void printMatrix(std::vector<std::vector<T>> matrix, bool colour = false)
+    {
+        for (int i = 0; i < matrix.size(); i++)
+            printVector(matrix.at(i), colour);
     }
 
     std::vector<char> commonElements(std::vector<char> vec1, std::vector<char> vec2)
